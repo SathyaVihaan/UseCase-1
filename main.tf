@@ -11,7 +11,7 @@ resource "aws_instance" "homepage" {
                 echo "Homepage" > /var/www/html/index.html
                 nohup busybox httpd -f -p 80 &
                 EOF
- _instance" "register" {
+  instance" "register" {
   ami           = "ami-0953476d60561c955"
   instance_type = "t2.micro"
   subnet_id     = aws_subnet.az2.id
