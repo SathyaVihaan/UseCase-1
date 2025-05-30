@@ -1,5 +1,5 @@
 resource "aws_instance" "homepage" {
-  ami           = "ami-0c55b159cbfafe1f0" # Replace with valid AMI
+  ami           = "ami-0953476d60561c955" # Replace with valid AMI
   instance_type = "t2.micro"
   subnet_id     = aws_subnet.az1.id
   user_data     = <<-EOF
@@ -8,7 +8,7 @@ resource "aws_instance" "homepage" {
                 nohup busybox httpd -f -p 80 &
                 EOF
  _instance" "register" {
-  ami           = "ami-0c55b159cbfafe1f0"
+  ami           = "ami-0953476d60561c955"
   instance_type = "t2.micro"
   subnet_id     = aws_subnet.az2.id
   user_data     = <<-EOF
@@ -22,7 +22,7 @@ resource "aws_instance" "homepage" {
 }
 
 resource "aws_instance" "image" {
-  ami           = "ami-0c55b159cbfafe1f0"
+  ami           = "ami-0953476d60561c955"
   instance_type = "t2.micro"
   subnet_id     = aws_subnet.az3.id
   user_data     = <<-EOF
