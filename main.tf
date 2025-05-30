@@ -1,19 +1,67 @@
+
 provider "aws" {
-  region = "us-east-1"
+  region = var.region
+}
+
+resource "aws_vpc" "main" {
+  cidr_block = var.vpc_cidr
+}
+
+resource "aws_subnet" "az1" {
+  vpc_id            = aws_vpc.main.id
+  cidr_block        = var.subnet_cidr_az1
+  availability_zone = "${var.region}a"
+}
+
+resource "aws_subnet" "az2" {
+  vpc_id            = aws_vpc.main.id
+  cidr_block        = var.subnet_cidr_az2
+  availability_zone = "${var.region}b"
+}
+
+resource "aws_subnet" "az3" {
+  vpc_id            = aws_vpc.main.id
+  cidr_block        = var.subnet_cidr_az3
+  availability_zone = "${var.region}c"
+}
+
+resource "aws_security_group" "alb_sg" {
+  name        = "alb-sg"
+  description = "Allow HTTP"
+  vpc_id      = aws_vpc.main.id
+
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 }
 
 resource "aws_instance" "homepage" {
-  ami           = "ami-0953476d60561c955" # Replace with valid AMI
-  instance_type = "t2.micro"
+  ami           = var.ami_id
+  instance_type = var.instance_type
   subnet_id     = aws_subnet.az1.id
   user_data     = <<-EOF
                 #!/bin/bash
                 echo "Homepage" > /var/www/html/index.html
                 nohup busybox httpd -f -p 80 &
                 EOF
-  instance" "register" {
-  ami           = "ami-0953476d60561c955"
-  instance_type = "t2.micro"
+  tags = {
+    Name = "Homepage"
+  }
+}
+
+resource "aws_instance" "register" {
+  ami           = var.ami_id
+  instance_type = var.instance_type
   subnet_id     = aws_subnet.az2.id
   user_data     = <<-EOF
                 #!/bin/bash
@@ -26,8 +74,8 @@ resource "aws_instance" "homepage" {
 }
 
 resource "aws_instance" "image" {
-  ami           = "ami-0953476d60561c955"
-  instance_type = "t2.micro"
+  ami           = var.ami_id
+  instance_type = var.instance_type
   subnet_id     = aws_subnet.az3.id
   user_data     = <<-EOF
                 #!/bin/bash
@@ -125,47 +173,5 @@ resource "aws_lb_listener_rule" "image_rule" {
     path_pattern {
       values = ["/image"]
     }
-  }
-}
-
-resource "aws_vpc" "main" {
-  cidr_block = "10.0.0.0/16"
-}
-
-resource "aws_subnet" "az1" {
-  vpc_id     = aws_vpc.main.id
-  cidr_block = "10.0.1.0/24"
-  availability_zone = "us-east-1a"
-}
-
-resource "aws_subnet" "az2" {
-  vpc_id     = aws_vpc.main.id
-  cidr_block = "10.0.2.0/24"
-  availability_zone = "us-east-1b"
-}
-
-resource "aws_subnet" "az3" {
-  vpc_id     = aws_vpc.main.id
-  cidr_block = "10.0.3.0/24"
-  availability_zone = "us-east-1c"
-}
-
-resource "aws_security_group" "alb_sg" {
-  name        = "alb-sg"
-  description = "Allow HTTP"
-  vpc_id      = aws_vpc.main.id
-
-  ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
   }
 }
